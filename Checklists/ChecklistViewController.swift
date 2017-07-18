@@ -62,6 +62,15 @@ class ChecklistViewController: UITableViewController, AddItemViewControllerDeleg
         dismiss(animated: true, completion: nil)
     }
     func addItemViewController(_ controller: AddItemViewController, didFinishAdding item: ChecklistItem) {
+        
+        let newRowIndex = items.count
+        items.append(item)
+        
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
+        //insert a new cell for it in the table view.
+        tableView.insertRows(at: indexPaths, with: .automatic)
+        
         dismiss(animated: true, completion: nil)
     }
     
@@ -117,20 +126,7 @@ class ChecklistViewController: UITableViewController, AddItemViewControllerDeleg
         
     }
 
-    @IBAction func addItem(_ sender: UIBarButtonItem) {
-        
-        let newRowIndex = items.count
-        //create a new ChecklistItem object
-        let item = ChecklistItem()
-        item.text = "I am a new row"
-        item.checked = true
-        //add it to the data model,
-        items.append(item)
-        let indexPath = IndexPath(row: newRowIndex, section: 0)
-        let indexPaths = [indexPath]
-        //insert a new cell for it in the table view.
-        tableView.insertRows(at: indexPaths, with: .automatic)
-    }
+
     //give data to the new view controller before it will be displayed
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
