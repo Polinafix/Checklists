@@ -1,5 +1,5 @@
 //
-//  AddItemViewController.swift
+//  ItemDetailViewController.swift
 //  Checklists
 //
 //  Created by Polina Fiksson on 12/07/2017.
@@ -9,14 +9,27 @@
 import Foundation
 import UIKit
 
-//AddItemViewControllerDelegate protocol
-protocol AddItemViewControllerDelegate: class {
-    func addItemViewControllerDidCancel(_ controller: AddItemViewController)
-    func addItemViewController(_ controller: AddItemViewController,
+//ItemDetailViewControllerDelegate protocol
+protocol ItemDetailViewControllerDelegate: class {
+    func itemDetailViewControllerDidCancel(_ controller: ItemDetailViewController)
+    func itemDetailViewController(_ controller: ItemDetailViewController,
                                didFinishAdding item: ChecklistItem)
+    func itemDetailViewController(_ controller: ItemDetailViewController,
+                               didFinishEditing item: ChecklistItem)
 }
 
-class AddItemViewController: UITableViewController, UITextFieldDelegate {
+class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
+    
+    var itemToEdit:ChecklistItem?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        if let item = itemToEdit{
+            title = "Edit Item"
+            textField.text = item.text
+            doneBarButton.isEnabled = true
+        }
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -26,22 +39,28 @@ class AddItemViewController: UITableViewController, UITextFieldDelegate {
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
     //property that the VC can use to refer to the delegate
-    weak var delegate: AddItemViewControllerDelegate?
+    weak var delegate: ItemDetailViewControllerDelegate?
     
     @IBAction func cancel(_ sender: UIBarButtonItem) {
         //“Is there a delegate? Then send the message"
-        delegate?.addItemViewControllerDidCancel(self)
+        delegate?.itemDetailViewControllerDidCancel(self)
         
     }
     
     @IBAction func done(_ sender: UIBarButtonItem) {
-       // create a new ChecklistItem object with the text from the text field
+        
+        if let item  = itemToEdit{
+            item.text = textField.text!
+            delegate?.itemDetailViewController(self, didFinishEditing: item)
+        }else{
+            // create a new ChecklistItem object with the text from the text field
         let item = ChecklistItem()
         item.text = textField.text!
         item.checked = false
         
-        delegate?.addItemViewController(self, didFinishAdding: item)
-      
+        delegate?.itemDetailViewController(self, didFinishAdding: item)
+        }
+       
     }
     //disable selecting the row
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {

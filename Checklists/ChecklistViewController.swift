@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ChecklistViewController: UITableViewController, AddItemViewControllerDelegate {
+class ChecklistViewController: UITableViewController, ItemDetailViewControllerDelegate {
     //// This declares that items will hold an array of ChecklistItem objects
     // but it does not actually create that array.
     // At this point, items does not have a value yet.
@@ -58,10 +58,12 @@ class ChecklistViewController: UITableViewController, AddItemViewControllerDeleg
         // Do any additional setup after loading the view, typically from a nib.
     }
     //delegate methods
-    func addItemViewControllerDidCancel(_ controller: AddItemViewController) {
+    //1
+    func itemDetailViewControllerDidCancel(_ controller: ItemDetailViewController) {
         dismiss(animated: true, completion: nil)
     }
-    func addItemViewController(_ controller: AddItemViewController, didFinishAdding item: ChecklistItem) {
+    //2
+    func itemDetailViewController(_ controller: ItemDetailViewController, didFinishAdding item: ChecklistItem) {
         
         let newRowIndex = items.count
         items.append(item)
@@ -73,7 +75,17 @@ class ChecklistViewController: UITableViewController, AddItemViewControllerDeleg
         
         dismiss(animated: true, completion: nil)
     }
-    
+    //3
+    func itemDetailViewController(_ controller: ItemDetailViewController, didFinishEditing item: ChecklistItem) {
+        //The row number is the same as the index of the ChecklistItem in the 'items' array
+        if let index = items.index(of:item){
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = tableView.cellForRow(at: indexPath){
+                configureText(for: cell, with: item)
+            }
+        }
+        dismiss(animated: true, completion: nil)
+    }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
@@ -99,10 +111,12 @@ class ChecklistViewController: UITableViewController, AddItemViewControllerDeleg
     
     func configureCheckmark(for cell: UITableViewCell,
                             with item: ChecklistItem) {
+        let label = cell.viewWithTag(1001) as! UILabel
+        
         if item.checked {
-            cell.accessoryType = .checkmark
+            label.text = "✔️"
         } else {
-            cell.accessoryType = .none
+            label.text = ""
         }
     }
 
@@ -128,14 +142,23 @@ class ChecklistViewController: UITableViewController, AddItemViewControllerDeleg
 
 
     //give data to the new view controller before it will be displayed
-
+    //sender = control that triggered the segue, in this
+    //case the table view cell whose disclosure button was tapped
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "AddItem" {
             let navigationController = segue.destination as! UINavigationController
-            let controller = navigationController.topViewController as! AddItemViewController
-            //This tells the AddItemViewController that from now on, the object known as self is its
+            let controller = navigationController.topViewController as! ItemDetailViewController
+            //This tells the ItemDetailViewController that from now on, the object known as self is its
             //delegate
             controller.delegate = self
+        }else if segue.identifier == "EditItem"{
+            let navigationController = segue.destination as! UINavigationController
+            let controller = navigationController.topViewController as! ItemDetailViewController
+            controller.delegate = self
+            if let indexPath = tableView.indexPath(for: sender as! UITableViewCell){
+                controller.itemToEdit = items[indexPath.row]
+            }
+            
         }
     }
 

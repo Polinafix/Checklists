@@ -9,8 +9,10 @@
 import Foundation
 
 //serves to combine the text and the checked variables into one object
-
-class ChecklistItem{
+//NSObject offers a bunch of useful functionality that standard Swift objects don’t have.
+//Building ChecklistItem on top of NSObject is enough to make it satisfy the
+//“equatable” requirement.
+class ChecklistItem:NSObject{
     var text =  ""
     var checked = false
     
