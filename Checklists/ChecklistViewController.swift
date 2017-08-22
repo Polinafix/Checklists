@@ -9,54 +9,66 @@
 import UIKit
 
 class ChecklistViewController: UITableViewController, ItemDetailViewControllerDelegate {
+    
+    var checklist:Checklist!
     //// This declares that items will hold an array of ChecklistItem objects
     // but it does not actually create that array.
     // At this point, items does not have a value yet.
     var items:[ChecklistItem]
     
 //    The init method is called by Swift when the object comes into existence.
-//    For the view controller that happens when it is loaded from the storyboard during
-//    app startup. At that point, its init?(coder) method is called.
-//    That makes init?(coder) a great place for putting values into any variables that
-//    still need them
+//    For the view controller that happens when it is loaded from the storyboard during app startup. At that point, its init?(coder) method is called.
+//    That makes init?(coder) a great place for putting values into any variables that still need them
     
     required init?(coder aDecoder: NSCoder) {
         //// This instantiates the array. Now items contains a valid array object,
         // but the array has no ChecklistItem objects inside it yet.
         items = [ChecklistItem]()
-        
-        let row0item = ChecklistItem()
-        row0item.text = "Walk the dog"
-        row0item.checked = false
-        items.append(row0item)
-        
-        let row1item = ChecklistItem()
-        row1item.text = "Brush my teeth"
-        row1item.checked = true
-        items.append(row1item) //
-        
-        let row2item = ChecklistItem()
-        row2item.text = "Learn iOS development"
-        row2item.checked = true
-        items.append(row2item)
-        
-        let row3item = ChecklistItem()
-        row3item.text = "Soccer practice"
-        row3item.checked = false
-        items.append(row3item)
-        
-        let row4item = ChecklistItem()
-        row4item.text = "Eat ice cream"
-        row4item.checked = true
-        items.append(row4item)
-        
         super.init(coder: aDecoder)
+        loadChecklistItems()
+//        print("Documents folder is \(documentsDirectory())")
+//        print("Data file path is \(dataFilePath())")
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        title = checklist.name
+        
     }
+    
+    //get the full path to the Documents folder
+    func documentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
+    }
+    //construct the full path to the file that will store the checklist items
+    func dataFilePath() -> URL {
+       return documentsDirectory().appendingPathComponent("Checklists.plist")
+    }
+    func saveChecklistItems(){
+        //take the contents of the items array and in two steps converts it to a block of binary data and then writes this data to a file
+        let data = NSMutableData()
+        //NSKeyedArchiver, which is a form of NSCoder that creates plist files, encodes the array and all the ChecklistItems in it into some sort of binary data format that can be written to a file.
+        let archiver = NSKeyedArchiver(forWritingWith: data)
+        archiver.encode(items, forKey:"ChecklistItems")
+        archiver.finishEncoding()
+        data.write(to: dataFilePath(), atomically: true)
+    }
+    
+    func loadChecklistItems(){
+        //put the results of dataFilePath() in a temporary constant named path
+        let path = dataFilePath()
+        //Try to load the contents of Checklists.plist into a new Data object -return nil if fails
+        if let data = try? Data(contentsOf: path){
+            //When the app does find a Checklists.plist file, you’ll load the entire array and its contents from the file.
+            let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
+            items = unarchiver.decodeObject(forKey: "ChecklistItems") as! [ChecklistItem]
+            unarchiver.finishDecoding()
+        }
+    }
+    
+    
+    
     //delegate methods
     //1
     func itemDetailViewControllerDidCancel(_ controller: ItemDetailViewController) {
@@ -72,6 +84,7 @@ class ChecklistViewController: UITableViewController, ItemDetailViewControllerDe
         let indexPaths = [indexPath]
         //insert a new cell for it in the table view.
         tableView.insertRows(at: indexPaths, with: .automatic)
+        saveChecklistItems()
         
         dismiss(animated: true, completion: nil)
     }
@@ -84,6 +97,7 @@ class ChecklistViewController: UITableViewController, ItemDetailViewControllerDe
                 configureText(for: cell, with: item)
             }
         }
+        saveChecklistItems()
         dismiss(animated: true, completion: nil)
     }
     
@@ -128,6 +142,7 @@ class ChecklistViewController: UITableViewController, ItemDetailViewControllerDe
             item.toggleChecked()
             configureCheckmark(for: cell, with:item)
         }
+        saveChecklistItems()
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
@@ -137,6 +152,7 @@ class ChecklistViewController: UITableViewController, ItemDetailViewControllerDe
         //2. delete the corresponding row from the table view.
         let indexPaths = [indexPath]
         tableView.deleteRows(at: indexPaths, with: .automatic)
+        saveChecklistItems()
         
     }
 
@@ -148,8 +164,7 @@ class ChecklistViewController: UITableViewController, ItemDetailViewControllerDe
         if segue.identifier == "AddItem" {
             let navigationController = segue.destination as! UINavigationController
             let controller = navigationController.topViewController as! ItemDetailViewController
-            //This tells the ItemDetailViewController that from now on, the object known as self is its
-            //delegate
+            //This tells the ItemDetailViewController that from now on, the object known as self is its delegate
             controller.delegate = self
         }else if segue.identifier == "EditItem"{
             let navigationController = segue.destination as! UINavigationController
