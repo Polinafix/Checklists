@@ -52,7 +52,11 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="(Name of the Checklist)" id="vv0-wE-Xbm">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="sRK-XG-j05"/>
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="sRK-XG-j05">
+                            <connections>
+                                <segue destination="695-bD-dRf" kind="presentation" identifier="AddItem" id="Qmd-Cz-ZIe"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cY2-BM-7xe" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -214,7 +218,7 @@
         <!--Navigation Controller-->
         <scene sceneID="iCp-J9-NFF">
             <objects>
-                <navigationController id="Ocf-HH-C8I" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="ListDetailNavigationController" id="Ocf-HH-C8I" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="3Jn-7L-DEN">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -264,4 +268,7 @@
             <point key="canvasLocation" x="1936.8" y="133.5832083958021"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="Qmd-Cz-ZIe"/>
+    </inferredMetricsTieBreakers>
 </document>

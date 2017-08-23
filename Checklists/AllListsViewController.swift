@@ -10,41 +10,25 @@ import UIKit
 
 class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate {
     //an array that will hold the Checklist objects
-    var lists:[Checklist]
-    
-    required init?(coder aDecoder: NSCoder){
-        lists = [Checklist]()
-        super.init(coder: aDecoder)
-        
-        var list = Checklist(name:"Birthdays")
-        lists.append(list)
-        
-        list = Checklist(name: "Groceries")
-        lists.append(list)
-        list = Checklist(name: "Cool Apps")
-        lists.append(list)
-        list = Checklist(name: "To Do")
-        lists.append(list)
-    }
+    var dataModel: DataModel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
     
     }
-
-
-
+    
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return lists.count
+        return dataModel.lists.count
     }
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = makeCell(for:tableView)
-        let checklist = lists[indexPath.row]
+        let checklist = dataModel.lists[indexPath.row]
         cell.textLabel!.text = checklist.name
         cell.accessoryType = .detailDisclosureButton
     
@@ -63,7 +47,7 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let checklist = lists[indexPath.row]
+        let checklist = dataModel.lists[indexPath.row]
         
        /* You can put anything you want into sender. If the segue is performed by the storyboard (rather than manually like you do here) then sender will refer to the control that triggered it, for example the UIBarButtonItem object for the Add button or the UITableViewCell for a row in the table. But because you start this particular segue by hand, you can put into sender whatever is most convenient.*/
         
@@ -75,8 +59,8 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     }
     
     func listDetailViewController(_ controller: ListDetailViewController, didFinishAdding checklist: Checklist) {
-        let newRowIndex = lists.count
-        lists.append(checklist)
+        let newRowIndex = dataModel.lists.count
+        dataModel.lists.append(checklist)
         
         let indexPath = IndexPath(row:newRowIndex, section:0)
         let indexPaths = [indexPath]
@@ -86,7 +70,7 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     }
     
     func listDetailViewController(_ controller: ListDetailViewController, didFinishEditing checklist: Checklist) {
-        if let index = lists.index(of: checklist){
+        if let index = dataModel.lists.index(of: checklist){
             let indexPath = IndexPath(row: index, section: 0)
             if let cell = tableView.cellForRow(at: indexPath){
                 cell.textLabel!.text = checklist.name
@@ -99,9 +83,21 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     override func tableView(_ tableView: UITableView,
                             commit editingStyle: UITableViewCellEditingStyle,
                             forRowAt indexPath: IndexPath) {
-        lists.remove(at: indexPath.row)
+        dataModel.lists.remove(at: indexPath.row)
         let indexPaths = [indexPath]
         tableView.deleteRows(at: indexPaths, with: .automatic)
+    }
+    
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        //each view controller has a storyboard property that refers to the storyboard the view controller was loaded from
+        let navigationController = storyboard!.instantiateViewController(withIdentifier: "ListDetailNavigationController") as! UINavigationController
+        let controller = navigationController.topViewController as! ListDetailViewController
+        controller.delegate = self
+        
+        let checklist = dataModel.lists[indexPath.row]
+        controller.checklistToEdit = checklist
+        
+        present(navigationController, animated: true, completion: nil)
     }
     //is called right before the segue happens. Here you get a chance to set the properties of the new view controller before it will become visible
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
