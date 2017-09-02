@@ -19,10 +19,11 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     }
     //UIKit automatically calls this method after the view controller has become visible.
     override func viewDidAppear(_ animated: Bool) {
+        
         super.viewDidAppear(animated)
         navigationController?.delegate = self
-        let index = UserDefaults.standard.integer(forKey: "ChecklistIndex")
-        if index != -1 {
+        let index = dataModel.indexOfSelectedChecklist
+        if index >= 0 && index < dataModel.lists.count {
             let checklist = dataModel.lists[index]
             performSegue(withIdentifier: "ShowChecklist", sender: checklist)
         }
@@ -58,7 +59,7 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //save the chosen row to user defaults
-        UserDefaults.standard.set(indexPath.row, forKey: "ChecklistIndex")
+        dataModel.indexOfSelectedChecklist = indexPath.row
         
         let checklist = dataModel.lists[indexPath.row]
         
@@ -115,8 +116,8 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
         
         //was the back button tapped?
-        if viewController === self {
-            UserDefaults.standard.set(-1, forKey:"ChecklistIndex")
+        if viewController == self {
+            dataModel.indexOfSelectedChecklist = -1
         }
     }
     

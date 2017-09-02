@@ -15,6 +15,7 @@ class DataModel{
     //as soon as the DataModel object is created, it will attempt to load Checklists.plist
     init() {
         loadChecklists()
+        registerDefaults()
     }
     
     //convenience method-full path to the Documents folder
@@ -38,6 +39,20 @@ class DataModel{
         archiver.finishEncoding()
         //That data is placed in an NSMutableData object, which will write itself to the file specified by dataFilePath()
         data.write(to: dataFilePath(), atomically: true)
+    }
+    //UserDefaults will use the values from this dictionary if you ask it for a key but it cannot find anything under that key
+    func registerDefaults() {
+        let dictionary:[String:Any] = ["ChecklistIndex":-1]
+        UserDefaults.standard.register(defaults: dictionary)
+    }
+    //computed property
+    var indexOfSelectedChecklist: Int {
+        get {
+            return UserDefaults.standard.integer(forKey: "ChecklistIndex")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "ChecklistIndex")
+        }
     }
     
     // this method is now called loadChecklists()
