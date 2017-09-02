@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate {
+class AllListsViewController: UITableViewController, ListDetailViewControllerDelegate, UINavigationControllerDelegate {
     //an array that will hold the Checklist objects
     var dataModel: DataModel!
 
@@ -16,6 +16,16 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         super.viewDidLoad()
 
     
+    }
+    //UIKit automatically calls this method after the view controller has become visible.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        navigationController?.delegate = self
+        let index = UserDefaults.standard.integer(forKey: "ChecklistIndex")
+        if index != -1 {
+            let checklist = dataModel.lists[index]
+            performSegue(withIdentifier: "ShowChecklist", sender: checklist)
+        }
     }
     
     
@@ -47,6 +57,9 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //save the chosen row to user defaults
+        UserDefaults.standard.set(indexPath.row, forKey: "ChecklistIndex")
+        
         let checklist = dataModel.lists[indexPath.row]
         
        /* You can put anything you want into sender. If the segue is performed by the storyboard (rather than manually like you do here) then sender will refer to the control that triggered it, for example the UIBarButtonItem object for the Add button or the UITableViewCell for a row in the table. But because you start this particular segue by hand, you can put into sender whatever is most convenient.*/
@@ -99,6 +112,14 @@ class AllListsViewController: UITableViewController, ListDetailViewControllerDel
         
         present(navigationController, animated: true, completion: nil)
     }
+    func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        
+        //was the back button tapped?
+        if viewController === self {
+            UserDefaults.standard.set(-1, forKey:"ChecklistIndex")
+        }
+    }
+    
     //is called right before the segue happens. Here you get a chance to set the properties of the new view controller before it will become visible
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowChecklist"{
