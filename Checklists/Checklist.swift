@@ -14,9 +14,15 @@ class Checklist: NSObject, NSCoding {
     var items = [ChecklistItem]()
     var iconName: String
     
-    init(name:String) {
+    /*
+     It does the same thing as init(name, iconName) but saves you from having to type iconName: "No Icon" whenever you want to use it. */
+    convenience init(name:String) {
+        self.init(name: name, iconName: "No Icon")
+    }
+    //designated-main initializer
+    init(name: String, iconName: String) {
         self.name = name
-        iconName = "No Icon"
+        self.iconName = iconName
         super.init()
     }
     
