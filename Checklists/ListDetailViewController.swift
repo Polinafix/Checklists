@@ -17,11 +17,14 @@ protocol ListDetailViewControllerDelegate: class {
                                   didFinishEditing checklist: Checklist)
 }
 class ListDetailViewController: UITableViewController,
-UITextFieldDelegate {
+UITextFieldDelegate, IconPickerViewControllerDelegate {
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
     weak var delegate: ListDetailViewControllerDelegate?
     var checklistToEdit: Checklist?
+    @IBOutlet weak var iconImageView: UIImageView!
+    
+    var iconName = "Folder"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +33,8 @@ UITextFieldDelegate {
             title = "Edit Checklist"
             textField.text = checklist.name
             doneBarButton.isEnabled = true
+            iconName = checklist.iconName
+            iconImageView.image = UIImage(named: iconName)
         }
     }
     
@@ -38,16 +43,24 @@ UITextFieldDelegate {
         textField.becomeFirstResponder()
     }
     
+    func iconPicker(_ picker: IconPickerViewController, didPick iconName: String) {
+        self.iconName = iconName
+        iconImageView.image = UIImage(named: iconName)
+        let _ = navigationController?.popViewController(animated: true)
+    }
+    
     @IBAction func cancel() {
         delegate?.listDetailViewControllerDidCancel(self)
     }
     @IBAction func done() {
         if let checklist = checklistToEdit {
             checklist.name = textField.text!
+            checklist.iconName = iconName
             delegate?.listDetailViewController(self,
                                                didFinishEditing: checklist)
         } else {
             let checklist = Checklist(name: textField.text!)
+            checklist.iconName = iconName
             delegate?.listDetailViewController(self,
                                                didFinishAdding: checklist)
         }
@@ -55,7 +68,12 @@ UITextFieldDelegate {
     //user cannot select the table cell with the text field
     override func tableView(_ tableView: UITableView,
                             willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        return nil
+        if indexPath.section == 1{
+            return indexPath
+        }else{
+          return nil
+        }
+        
     }
     //enables or disables the Done button depending on whether the text field is empty or not
     func textField(_ textField: UITextField,
@@ -66,5 +84,12 @@ UITextFieldDelegate {
             as NSString
         doneBarButton.isEnabled = (newText.length > 0)
         return true
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "PickIcon" {
+            let controller = segue.destination as! IconPickerViewController
+            controller.delegate = self
+        }
     }
 }

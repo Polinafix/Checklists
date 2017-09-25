@@ -21,9 +21,11 @@ protocol ItemDetailViewControllerDelegate: class {
 class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
     
     var itemToEdit:ChecklistItem?
+    let controller:ChecklistViewController? = nil
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //self.delegate = controller
         if let item = itemToEdit{
             title = "Edit Item"
             textField.text = item.text
@@ -33,6 +35,7 @@ class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        //self.delegate = controller
         textField.becomeFirstResponder()
     }
     

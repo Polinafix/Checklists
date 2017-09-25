@@ -16,6 +16,7 @@ class DataModel{
     init() {
         loadChecklists()
         registerDefaults()
+        handleFirstTime()
     }
     
     //convenience method-full path to the Documents folder
@@ -27,6 +28,12 @@ class DataModel{
     //construct the full path to the file that will store the checklists
     func dataFilePath() -> URL {
         return documentsDirectory().appendingPathComponent("Checklists.plist")
+    }
+    //Here you tell the lists array that the Checklists it contains should be sorted usingsome formula. - closure is used
+    func sortChecklists() {
+        lists.sort(by: { checklist1, checklist2 in
+            return checklist1.name.localizedStandardCompare(checklist2.name) ==
+                .orderedAscending })
     }
     
     // NSKeyedArchiver, which is a form of NSCoder that creates plist files, encodes the array and all the ChecklistItems in it into some sort of binary data format that can be written to a file.
@@ -42,8 +49,19 @@ class DataModel{
     }
     //UserDefaults will use the values from this dictionary if you ask it for a key but it cannot find anything under that key
     func registerDefaults() {
-        let dictionary:[String:Any] = ["ChecklistIndex":-1]
+        let dictionary:[String:Any] = ["ChecklistIndex":-1, "FirstTime": true]
         UserDefaults.standard.register(defaults: dictionary)
+    }
+    func handleFirstTime() {
+        let userDefaults = UserDefaults.standard
+        let firstTime = userDefaults.bool(forKey: "FirstTime")
+        if firstTime {
+            let checklist = Checklist(name: "List")
+            lists.append(checklist)
+            indexOfSelectedChecklist = 0
+            userDefaults.set(false, forKey: "FirstTime")
+            userDefaults.synchronize()
+        }
     }
     //computed property
     var indexOfSelectedChecklist: Int {
@@ -68,5 +86,7 @@ class DataModel{
             lists = unarchiver.decodeObject(forKey: "Checklists") as! [Checklist]
             unarchiver.finishDecoding()
         }
+        //make sure the existing lists are also sorted in the right order
+        sortChecklists()
     }
 }

@@ -11,6 +11,7 @@ import UIKit
 class ChecklistViewController: UITableViewController, ItemDetailViewControllerDelegate {
     
     var checklist:Checklist!
+   // var controller:ItemDetailViewController!
     //// This declares that items will hold an array of ChecklistItem objects
     // but it does not actually create that array.
     // At this point, items does not have a value yet.
@@ -20,6 +21,7 @@ class ChecklistViewController: UITableViewController, ItemDetailViewControllerDe
     override func viewDidLoad() {
         super.viewDidLoad()
         title = checklist.name
+        //controller.delegate = self
         
     }
     
