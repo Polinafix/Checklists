@@ -23,6 +23,14 @@ class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
     var itemToEdit:ChecklistItem?
     let controller:ChecklistViewController? = nil
     
+    @IBOutlet weak var textField: UITextField!
+    @IBOutlet weak var doneBarButton: UIBarButtonItem!
+    //property that the VC can use to refer to the delegate
+    weak var delegate: ItemDetailViewControllerDelegate?
+    @IBOutlet weak var shouldRemindSwitch: UISwitch!
+    @IBOutlet weak var dueDateLabel: UILabel!
+    var dueDate = Date()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         //self.delegate = controller
@@ -30,7 +38,10 @@ class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
             title = "Edit Item"
             textField.text = item.text
             doneBarButton.isEnabled = true
+            shouldRemindSwitch.isOn = item.shouldRemind
+            dueDate = item.dueDate
         }
+        updateDueDateLabel()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -38,11 +49,17 @@ class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
         //self.delegate = controller
         textField.becomeFirstResponder()
     }
+    //To convert the Date value to text, you use the DateFormatter object
+    func updateDueDateLabel() {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        dueDateLabel.text = formatter.string(from: dueDate)
+    }
     
-    @IBOutlet weak var textField: UITextField!
-    @IBOutlet weak var doneBarButton: UIBarButtonItem!
-    //property that the VC can use to refer to the delegate
-    weak var delegate: ItemDetailViewControllerDelegate?
+    
+    
+    
     
     @IBAction func cancel(_ sender: UIBarButtonItem) {
         //“Is there a delegate? Then send the message"
@@ -54,12 +71,19 @@ class ItemDetailViewController: UITableViewController, UITextFieldDelegate {
         
         if let item  = itemToEdit{
             item.text = textField.text!
+            
+            item.shouldRemind = shouldRemindSwitch.isOn
+            item.dueDate = dueDate
+            
             delegate?.itemDetailViewController(self, didFinishEditing: item)
         }else{
             // create a new ChecklistItem object with the text from the text field
         let item = ChecklistItem()
         item.text = textField.text!
         item.checked = false
+            
+        item.shouldRemind = shouldRemindSwitch.isOn
+        item.dueDate = dueDate
         
         delegate?.itemDetailViewController(self, didFinishAdding: item)
         }

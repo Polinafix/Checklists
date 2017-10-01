@@ -49,7 +49,7 @@ class DataModel{
     }
     //UserDefaults will use the values from this dictionary if you ask it for a key but it cannot find anything under that key
     func registerDefaults() {
-        let dictionary:[String:Any] = ["ChecklistIndex":-1, "FirstTime": true]
+        let dictionary:[String:Any] = ["ChecklistIndex":-1, "FirstTime": true,"ChecklistItemID": 0]
         UserDefaults.standard.register(defaults: dictionary)
     }
     func handleFirstTime() {
@@ -88,5 +88,16 @@ class DataModel{
         }
         //make sure the existing lists are also sorted in the right order
         sortChecklists()
+    }
+    
+    //gets the current “ChecklistItemID” value from UserDefaults, adds 1 to
+    //it, and writes it back to UserDefaults. It returns the previous value to the caller.
+    class func nextChecklistItemID() -> Int {
+        let userDefaults = UserDefaults.standard
+        let itemID = userDefaults.integer(forKey: "ChecklistItemID")
+        userDefaults.set(itemID + 1, forKey: "ChecklistItemID")
+        //force UserDefaults to write these changes to disk immediately
+        userDefaults.synchronize()
+        return itemID
     }
 }

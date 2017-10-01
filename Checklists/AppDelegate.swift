@@ -7,20 +7,40 @@
 //
 
 import UIKit
+import UserNotifications
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate,UNUserNotificationCenterDelegate {
 
     var window: UIWindow?
     let dataModel = DataModel()
 
-
+    //is called when the app starts up
+    //do smth here right after the app launches
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         let navigationController = window!.rootViewController as! UINavigationController
         let controller = navigationController.viewControllers[0] as! AllListsViewController
         controller.dataModel = dataModel
+        
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        //UNMutableNotificationContent describes what the local notification will say
+        let content = UNMutableNotificationContent()
+        content.title = "Hello!"
+        content.body = "I am a local notification"
+        content.sound = UNNotificationSound.default()
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10,
+                                                        repeats: false)
+        let request = UNNotificationRequest(identifier: "MyNotification",
+                                            content: content, trigger: trigger)
+        center.add(request)
+        
         return true
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        print("Received local notification \(notification)")
     }
     
     func saveData(){
